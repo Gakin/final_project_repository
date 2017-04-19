@@ -63,7 +63,8 @@ public class MyEncoder {
 			CurFrame.convertRGB2YUV();			
 
 			int nfrm = 0;
-			while (nfrm < numFrames){
+			while (nfrm <  numFrames){
+				//while (nfrm < 1){
 				is.read(RBytes, 0, RBytes.length);
 				MyFrame RefFrame = new MyFrame(RBytes,width,height);
 				RefFrame.convertRGB2YUV();
@@ -81,9 +82,10 @@ public class MyEncoder {
 				int h=0;
 				for (int z=0;z<34;z++){
 					for(int s=0;s<60;s++){
-						for (int t =5;t<16;t++){
+						for (int t =0;t<16;t++){
 							for (int f=0;f<16;f++){
 								h = (z * 16 + t) * width + s * 16 + f;
+								//System.out.println(h);
 								if (h<RBytes.length) {		
 									RBytes[h] = mvec.refFrame.iBlocks[s][z].iBlock[f][t] ;	
 								}
