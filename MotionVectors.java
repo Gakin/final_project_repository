@@ -6,6 +6,8 @@ class Block{
 	protected byte [][] iBlock;
 	protected int XVector;
 	protected int YVector;
+	protected double VLength;
+	protected int VDirection;
 	protected boolean background;
 
 	public Block(int Size) {   
@@ -80,9 +82,10 @@ public class MotionVectors {
 	public void SumAbsoluteDifference(){
 		int SAD = 0;
 		int min = 100000;
-		int SearchSize = 16;
+		int SearchSize = 4;
 		int vecX = 0;
 		int vecY = 0;
+
 		for (int rY=0; rY < refFrame.numY; rY++){
 			for (int rX = 0; rX < refFrame.numX; rX++){		
 				min = 10000;
@@ -91,89 +94,97 @@ public class MotionVectors {
 				int startX = (rX * 16) - SearchSize;
 				int endY   = (rY * 16) + SearchSize;
 				int endX   = (rX * 16) + SearchSize;
-				//	            System.out.println("(" + startX + "," + startY +")     -      " + "(" + endX + "," +  endY +")");
 
 				if (startY < 0) {endY = endY - startY;startY = 0;};
 				if (startX < 0) {endX = endX - startX;startX = 0;};
 				if (endY > refFrame.h) {endY = refFrame.h;};
 				if (endX > refFrame.w) {endX = refFrame.w;};
-				//	            System.out.println("C (" + startX + "," + startY +")     -      " + "(" + endX + "," +  endY +")");
+
 				for (int cY = startY; cY < endY; cY++){
 					for (int cX = startX; cX < endX; cX++){
-						vecX = cX;
-						vecY = cY;
-						SAD = 0;
+						SAD = 0;						
 						for (int py=0;py<16;py++){
 							for (int px=0;px<16;px++){
-								SAD = SAD + Math.abs(this.IFrame[cY * this.width + cX] - refFrame.iBlocks[rX][rY].iBlock[px][py]);
+								
+								int f = cX + px;
+								int g = cY + py;
+								int mh = g * width + f;
+								
+								//int nh = (rY * 16 + py) * width + rX * 16 + px;
+								SAD = SAD + Math.abs(Math.abs((int)this.IFrame[mh]) - Math.abs((int)refFrame.iBlocks[rX][rY].iBlock[px][py]));								
 							}
-						}	            		
+						}	
+						if (min > SAD){
+							min = SAD;
+							vecX = cX;
+							vecY = cY;
+							refFrame.iBlocks[rX][rY].XVector = vecX - (rX * 16);
+							refFrame.iBlocks[rX][rY].YVector = vecY - (rY * 16);
+						}
 					}
 				}
-				if (min > SAD){
-					min = SAD;
-					//if (min < 500){
-					refFrame.iBlocks[rX][rY].XVector = vecX - rX;
-					refFrame.iBlocks[rX][rY].YVector = vecY - rY;								
-					//}					
-					//System.out.println("SAD :" + SAD + "  Orig : (" + rX + "," + rY+ ")" + " Vec : (" + refFrame.iBlocks[rX][rY].XVector + "," + refFrame.iBlocks[rX][rY].YVector+")");
+
+				//Calculate Vector Direction and Length
+				double vx = (double) refFrame.iBlocks[rX][rY].XVector;
+				double vy = (double) refFrame.iBlocks[rX][rY].YVector;
+				refFrame.iBlocks[rX][rY].VLength = Math.sqrt(vx *vx + vy *vy);
+				
+				if ((refFrame.iBlocks[rX][rY].YVector == 0) && (refFrame.iBlocks[rX][rY].XVector > 0)){
+					refFrame.iBlocks[rX][rY].VDirection = 90;
 				}
-				if ((refFrame.iBlocks[rX][rY].XVector < 100) && (refFrame.iBlocks[rX][rY].YVector < 100)){
+				else if ((refFrame.iBlocks[rX][rY].YVector == 0) && (refFrame.iBlocks[rX][rY].XVector < 0)){
+					refFrame.iBlocks[rX][rY].VDirection = 270;
+				}
+				else if ((refFrame.iBlocks[rX][rY].YVector == 0) && (refFrame.iBlocks[rX][rY].XVector == 0)){
+					refFrame.iBlocks[rX][rY].VDirection = 0;
+				}
+				else if (((refFrame.iBlocks[rX][rY].XVector > 0) && (refFrame.iBlocks[rX][rY].YVector > 0)) ||
+				    ((refFrame.iBlocks[rX][rY].XVector > 0) && (refFrame.iBlocks[rX][rY].YVector < 0))){
+					refFrame.iBlocks[rX][rY].VDirection = (int)(90 -((Math.atan(refFrame.iBlocks[rX][rY].XVector/refFrame.iBlocks[rX][rY].YVector) / Math.PI) * 180));
+				}
+				else if (refFrame.iBlocks[rX][rY].YVector != 0){
+					refFrame.iBlocks[rX][rY].VDirection = (int)(270 -((Math.atan(refFrame.iBlocks[rX][rY].XVector/refFrame.iBlocks[rX][rY].YVector) / Math.PI) * 180));				
+				}
+
+				
+				//Decision for background or foreground need to be updated camera move compansation ????
+				if (refFrame.iBlocks[rX][rY].VLength < 2.0){
+					refFrame.iBlocks[rX][rY].background = true;	
+				}
+				else{
 					refFrame.iBlocks[rX][rY].background = false;
-					//Added to see the foregorund blocks
+					//Added to see the foregorund blocks will be removed
 					for (int py=0;py<16;py++){
 						for (int px=0;px<16;px++){
 							refFrame.iBlocks[rX][rY].iBlock[px][py] = -127;
 						}
 					}
-					//End of block
-				}
-				else{
-					refFrame.iBlocks[rX][rY].background = true;
-
+					//End of block							
 				}
 			}
 		}
+		
+		//DCT calculate
+		
+		for (int rY=0; rY < refFrame.numY; rY++){
+			for (int rX = 0; rX < refFrame.numX; rX++){		
+				System.out.print("(" + (int)refFrame.iBlocks[rX][rY].XVector + "," + (int) refFrame.iBlocks[rX][rY].YVector+ ")\t");
+			}
+			System.out.println();
+		}
+		
+		System.out.println();
+		System.out.println();
+		System.out.println();
+		
+		for (int rY=0; rY < refFrame.numY; rY++){
+			for (int rX = 0; rX < refFrame.numX; rX++){		
+				System.out.print("(" + (int)refFrame.iBlocks[rX][rY].VDirection + "," + (int) refFrame.iBlocks[rX][rY].VLength+ ")\t");
+			}
+			System.out.println();
+		}
+		
 
-		//				for (int cY = startY; cY < endY; cY++){
-		//					for (int cX = startX; cX < endX; cX++){
-		//						SAD = 0;
-		//						for (int py=0;py<16;py++){
-		//							for (int px=0;px<16;px++){
-		//								SAD = SAD + Math.abs(curFrame.iBlocks[cX][cY].iBlock[px][py] - refFrame.iBlocks[rX][rY].iBlock[px][py]);
-		//							}
-		//						}
-		//						if (min > SAD){
-		//							min = SAD;
-		//							//if (min < 500){
-		//								refFrame.iBlocks[rX][rY].XVector = cX;
-		//								refFrame.iBlocks[rX][rY].YVector = cY;								
-		//							//}					
-		//						}
-		//					}
-		//				}
-
-
-
-
-		//	            
-		//	            
-		//				refFrame.iBlocks[rX][rY].XVector=rX - refFrame.iBlocks[rX][rY].XVector;
-		//				refFrame.iBlocks[rX][rY].YVector=rY - refFrame.iBlocks[rX][rY].YVector;	
-		//				
-		//				if ((refFrame.iBlocks[rX][rY].XVector == 0) && (refFrame.iBlocks[rX][rY].YVector == 0)){
-		//					refFrame.iBlocks[rX][rY].background = true;
-		//				}
-		//				else{
-		//					refFrame.iBlocks[rX][rY].background = false;
-		//					//Added to see the foregorund blocks
-		//					for (int py=0;py<16;py++){
-		//						for (int px=0;px<16;px++){
-		//							refFrame.iBlocks[rX][rY].iBlock[px][py] = -127;
-		//						}
-		//					}
-		//					//End of block
-		//				}
 
 	}
 }

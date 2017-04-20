@@ -57,7 +57,6 @@ public class MyEncoder {
 
 			File imageFile = new File(args[0]);
 			InputStream is = new FileInputStream(imageFile);
-
 			is.read(IBytes, 0, IBytes.length);
 			MyFrame CurFrame = new MyFrame(IBytes,width,height);
 			CurFrame.convertRGB2YUV();			
@@ -85,8 +84,7 @@ public class MyEncoder {
 						for (int t =0;t<16;t++){
 							for (int f=0;f<16;f++){
 								h = (z * 16 + t) * width + s * 16 + f;
-								//System.out.println(h);
-								if (h<RBytes.length) {		
+								if (h < (width * height)) {		
 									RBytes[h] = mvec.refFrame.iBlocks[s][z].iBlock[f][t] ;	
 								}
 								else{
