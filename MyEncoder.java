@@ -84,17 +84,17 @@ public class MyEncoder {
 
 				//Before DCT convert R
 				RefFrame.convertYUV2RGB();
-				
-				for (int rY=0; rY < RefFrame.height-dctBlockSize;rY = rY + dctBlockSize ){
-					for (int rX = 0; rX < RefFrame.width-dctBlockSize;rX = rX + dctBlockSize){
+
+				for (int rY=0; rY < RefFrame.height;rY = rY + dctBlockSize ){
+					for (int rX = 0; rX < RefFrame.width;rX = rX + dctBlockSize){
 
 						//System.out.print(conv.getBlockXIndex(rX, rY) + "   " + conv.getBlockYIndex(rX, rY));
 						//Write to the output file
 						if (mvec.refFrame.iBlocks[conv.getBlockXIndex(rX, rY)][conv.getBlockYIndex(rX, rY)].background) {
-							//System.out.println("BACKGROUND");
+							//System.out.print("B ");
 						}
 						else{
-							//System.out.println("FOREGROUND");
+							//System.out.print("F ");
 						}
 
 						//DCT Red Part
@@ -102,11 +102,12 @@ public class MyEncoder {
 						float [][] dctRM = Matrix.createFloatMatrix(dctBlockSize, dctBlockSize);						
 						for (int my=0;my<dctBlockSize;my++){
 							for (int mx=0;mx<dctBlockSize;mx++){
-								dctRM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my)];
-								//System.out.println(converter.getFrameIndex(rX + mx, rY + my));
+								if (((rX + mx) < width) && ((rY + my) < height)){								
+									dctRM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my)];
+								}
 							}
 						}
-
+						//System.out.print("R ");
 						//System.out.println("G1 = " + Matrix.toString(dctRM)); //to be deleted
 						dctR.DCT(dctRM);
 						//Write to the output file
@@ -118,11 +119,12 @@ public class MyEncoder {
 						float [][] dctGM = Matrix.createFloatMatrix(dctBlockSize, dctBlockSize);						
 						for (int my=0;my<dctBlockSize;my++){
 							for (int mx=0;mx<dctBlockSize;mx++){
-								dctGM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height];
-								//System.out.println(converter.getFrameIndex(rX + mx, rY + my));
+								if (((rX + mx) < width) && ((rY + my) < height)){								
+									dctGM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height];
+								}
 							}
 						}
-
+						//System.out.print("G ");
 						//System.out.println("G1 = " + Matrix.toString(dctGM)); //to be deleted
 						dctG.DCT(dctGM);
 						//Write to the output file
@@ -133,17 +135,18 @@ public class MyEncoder {
 						float [][] dctBM = Matrix.createFloatMatrix(dctBlockSize, dctBlockSize);						
 						for (int my=0;my<dctBlockSize;my++){
 							for (int mx=0;mx<dctBlockSize;mx++){
-								dctBM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height * 2];
-								//System.out.println(converter.getFrameIndex(rX + mx, rY + my));
-								
+								if (((rX + mx) < width) && ((rY + my) < height)){								
+									dctBM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height * 2];
+								}
 							}
 						}
-
+						//System.out.print("B ");
 						//System.out.println("G1 = " + Matrix.toString(dctBM)); //to be deleted
 						dctB.DCT(dctBM);
 						//Write to the output file
 						//System.out.println("G2 = " + Matrix.toString(dctBM)); //to be deleted						
 					}
+					System.out.println();
 				}				
 
 
