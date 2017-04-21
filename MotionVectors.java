@@ -3,7 +3,6 @@ package project1;
 
 class Block{
 	protected int N;
-	protected byte [][] iBlock;
 	protected int XVector;
 	protected int YVector;
 	protected double VLength;
@@ -12,7 +11,6 @@ class Block{
 
 	public Block(int Size) {   
 		this.N = Size;
-		iBlock = new byte [N][N];
 	}
 
 }
@@ -44,48 +42,32 @@ class BlockList{
 public class MotionVectors {
 	protected int    width;
 	protected int    height;
+	protected int    blockSize;
 	protected int    length;
 	protected byte [] IFrame;
+	protected byte [] RFrame;
 	protected BlockList curFrame;
 	protected BlockList refFrame;
 
-	public MotionVectors(byte[] IFrame, byte[]  RFrame,int width, int height) {
+
+	public MotionVectors(byte[] IFrame, byte[]  RFrame,int width, int height,int blockSize) {
 		this.width  = width;
 		this.height = height;
+		this.blockSize = blockSize;
 		this.length = width * height;
 		this.IFrame = IFrame;
-
-		curFrame =  new BlockList(16,width,height);
+		this.RFrame = RFrame;		
 		refFrame =  new BlockList(16,width,height);
-
-		int h=0;
-		for (int blockY=0;blockY<curFrame.numY;blockY++){
-			for(int blockX=0;blockX<curFrame.numX;blockX++){
-				for (int indY =0;indY<16;indY++){
-					for (int indX=0;indX<16;indX++){
-						h = (blockY * 16 + indY) * width + blockX * 16 + indX;
-						if (h<length) {						
-							curFrame.iBlocks[blockX][blockY].iBlock[indX][indY] = IFrame[h];
-							refFrame.iBlocks[blockX][blockY].iBlock[indX][indY] = RFrame[h];
-						}
-						else{
-							break;
-						}
-					}
-				}
-			}
-		}
 	}
-
-
 
 	public void SumAbsoluteDifference(){
 		int SAD = 0;
 		int min = 100000;
-		int SearchSize = 4;
+		int SearchSize = 8;
 		int vecX = 0;
 		int vecY = 0;
-
+		IndexConverter conv  = new IndexConverter(this.width,this.height,this.blockSize);
+		
 		for (int rY=0; rY < refFrame.numY; rY++){
 			for (int rX = 0; rX < refFrame.numX; rX++){		
 				min = 10000;
@@ -105,13 +87,7 @@ public class MotionVectors {
 						SAD = 0;						
 						for (int py=0;py<16;py++){
 							for (int px=0;px<16;px++){
-								
-								int f = cX + px;
-								int g = cY + py;
-								int mh = g * width + f;
-								
-								//int nh = (rY * 16 + py) * width + rX * 16 + px;
-								SAD = SAD + Math.abs(Math.abs((int)this.IFrame[mh]) - Math.abs((int)refFrame.iBlocks[rX][rY].iBlock[px][py]));								
+								SAD = SAD + Math.abs(Math.abs((int)this.IFrame[conv.getFrameIndex(cX + px,cY+py)]) - Math.abs((int)this.RFrame[conv.getFrameIndex(rX, rY, px, py)]));								
 							}
 						}	
 						if (min > SAD){
@@ -124,11 +100,12 @@ public class MotionVectors {
 					}
 				}
 
-				//Calculate Vector Direction and Length
+				//Calculate Vector Length
 				double vx = (double) refFrame.iBlocks[rX][rY].XVector;
 				double vy = (double) refFrame.iBlocks[rX][rY].YVector;
 				refFrame.iBlocks[rX][rY].VLength = Math.sqrt(vx *vx + vy *vy);
 				
+				//Calculate Vector Direction
 				if ((refFrame.iBlocks[rX][rY].YVector == 0) && (refFrame.iBlocks[rX][rY].XVector > 0)){
 					refFrame.iBlocks[rX][rY].VDirection = 90;
 				}
@@ -153,39 +130,18 @@ public class MotionVectors {
 				}
 				else{
 					refFrame.iBlocks[rX][rY].background = false;
+					
 					//Added to see the foregorund blocks will be removed
 					for (int py=0;py<16;py++){
 						for (int px=0;px<16;px++){
-							refFrame.iBlocks[rX][rY].iBlock[px][py] = -127;
+							RFrame[conv.getFrameIndex(rX, rY, px,py)]= -127;
 						}
 					}
-					//End of block							
+					//End of block	
+					
 				}
 			}
 		}
-		
-		//DCT calculate
-		
-		for (int rY=0; rY < refFrame.numY; rY++){
-			for (int rX = 0; rX < refFrame.numX; rX++){		
-				System.out.print("(" + (int)refFrame.iBlocks[rX][rY].XVector + "," + (int) refFrame.iBlocks[rX][rY].YVector+ ")\t");
-			}
-			System.out.println();
-		}
-		
-		System.out.println();
-		System.out.println();
-		System.out.println();
-		
-		for (int rY=0; rY < refFrame.numY; rY++){
-			for (int rX = 0; rX < refFrame.numX; rX++){		
-				System.out.print("(" + (int)refFrame.iBlocks[rX][rY].VDirection + "," + (int) refFrame.iBlocks[rX][rY].VLength+ ")\t");
-			}
-			System.out.println();
-		}
-		
-
-
 	}
 }
 

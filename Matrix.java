@@ -1,4 +1,6 @@
-package dct;
+package project1;
+
+
 
 /*******************************************************************************
 
@@ -19,7 +21,7 @@ package dct;
 
 
 
-import dct.PrintPrecision;
+import project1.PrintPrecision;
 
 
 
@@ -2187,3 +2189,4 @@ public abstract class Matrix {
 	}
 
 }
+

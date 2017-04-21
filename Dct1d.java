@@ -1,3 +1,4 @@
+package project1;
 /*******************************************************************************
 
  * This software is provided as a supplement to the authors' textbooks on digital
@@ -16,11 +17,10 @@
 
 
 
-package dct;
 
 
 
-import dct.Matrix;
+import project1.Matrix;
 
 
 

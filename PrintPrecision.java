@@ -1,3 +1,5 @@
+package project1;
+
 /*******************************************************************************
 
  * This software is provided as a supplement to the authors' textbooks on digital
@@ -14,7 +16,6 @@
 
  *******************************************************************************/
 
-package dct;
 
 
 
