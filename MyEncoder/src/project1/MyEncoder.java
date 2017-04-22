@@ -6,19 +6,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 //import javax.swing.SwingConstants;
-
-import org.jtransforms.dct.FloatDCT_2D;
 
 //import project1.DisplayFrame;
 import project1.MotionVectors;
@@ -70,13 +65,7 @@ public class MyEncoder {
 
 			File imageFile = new File(args[0]);
 			int numFrames = (int)(imageFile.length()/(width * height * 3));
-			
-//			PrintWriter encodedOutput = new PrintWriter("C:\\Users\\goksu\\workspace\\MyEncoder\\src\\project1\\encoded.cmp","UTF-8");
-			
-			/* Mod - Store */
-			String targetFileName = "c:\\cs576\\oneperson_960_540.cmp";
-			FileOutputStream fos = new FileOutputStream(targetFileName);
-			
+			PrintWriter encodedOutput = new PrintWriter("C:\\Users\\goksu\\workspace\\MyEncoder\\src\\project1\\encoded.cmp","UTF-8");
 			InputStream is = new FileInputStream(imageFile);
 			is.read(IBytes, 0, IBytes.length);
 			MyFrame CurFrame = new MyFrame(IBytes,width,height);
@@ -105,23 +94,12 @@ public class MyEncoder {
 						//System.out.print(conv.getBlockXIndex(rX, rY) + "   " + conv.getBlockYIndex(rX, rY));
 						//Write to the output file
 						if (mvec.refFrame.iBlocks[conv.getBlockXIndex(rX, rY)][conv.getBlockYIndex(rX, rY)].background) {
-//							encodedOutput.write("0 ");
+							encodedOutput.write("0 ");
 							//System.out.print("B ");
 						}
 						else{
-//							encodedOutput.write("1 ");
+							encodedOutput.write("1 ");
 							//System.out.print("F ");
-						}
-						
-						/* Mod - Store  */
-						// Allocate byte buffer for 1 block
-						ByteBuffer buffer = ByteBuffer.allocate(1 + (3 * 4 * dctBlockSize * dctBlockSize)).order(ByteOrder.BIG_ENDIAN);
-						// Put byte value to indicate block type
-						if (mvec.refFrame.iBlocks[conv.getBlockXIndex(rX, rY)][conv.getBlockYIndex(rX, rY)].background) {
-							buffer.put((byte)0);
-						}
-						else{
-							buffer.put((byte)1);
 						}
 
 						//DCT Red Part
@@ -130,14 +108,13 @@ public class MyEncoder {
 						for (int my=0;my<dctBlockSize;my++){
 							for (int mx=0;mx<dctBlockSize;mx++){
 								if (((rX + mx) < width) && ((rY + my) < height)){								
-									dctRM[mx][my] = (int) RBytes[converter.getFrameIndex(rX + mx, rY + my)] & 0xff;
+									dctRM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my)];
 								}
 							}
 						}
 						//System.out.print("R ");
 						//System.out.println("G1 = " + Matrix.toString(dctRM)); //to be deleted
 						dctR.DCT(dctRM);
-						
 						//Write to the output file
 						//System.out.println("G2 = " + Matrix.toString(dctRM)); //to be deleted
 
@@ -148,14 +125,13 @@ public class MyEncoder {
 						for (int my=0;my<dctBlockSize;my++){
 							for (int mx=0;mx<dctBlockSize;mx++){
 								if (((rX + mx) < width) && ((rY + my) < height)){								
-									dctGM[mx][my] = (int) RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height] & 0xff;
+									dctGM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height];
 								}
 							}
 						}
 						//System.out.print("G ");
 						//System.out.println("G1 = " + Matrix.toString(dctGM)); //to be deleted
 						dctG.DCT(dctGM);
-						
 						//Write to the output file
 						//System.out.println("G2 = " + Matrix.toString(dctGM)); //to be deleted
 
@@ -165,32 +141,21 @@ public class MyEncoder {
 						for (int my=0;my<dctBlockSize;my++){
 							for (int mx=0;mx<dctBlockSize;mx++){
 								if (((rX + mx) < width) && ((rY + my) < height)){								
-									dctBM[mx][my] = (int) RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height * 2] & 0xff;
+									dctBM[mx][my] = RBytes[converter.getFrameIndex(rX + mx, rY + my) + width * height * 2];
 								}
 							}
 						}
 						//System.out.print("B ");
 						//System.out.println("G1 = " + Matrix.toString(dctBM)); //to be deleted
 						dctB.DCT(dctBM);
-						
 						//Write to the output file
-//						encodedOutput.write(Matrix.toString(dctRM)+" "+Matrix.toString(dctGM)+" "+Matrix.toString(dctBM)+"\n");
-						//System.out.println("G2 = " + Matrix.toString(dctBM)); //to be deleted			
-						
-						/* Mod - Store */
-						// Populate Coefficient to Buffer
-						putCoefficient(buffer, dctRM);
-						putCoefficient(buffer, dctGM);
-						putCoefficient(buffer, dctBM);
-						// Write to Outputstream
-						fos.write(buffer.array());
-						
+						encodedOutput.write(Matrix.toString(dctRM)+" "+Matrix.toString(dctGM)+" "+Matrix.toString(dctBM)+"\n");
+						//System.out.println("G2 = " + Matrix.toString(dctBM)); //to be deleted						
 					}
 				}				
 
-
-				is.read(IBytes, 0, IBytes.length);
-				MyFrame IFrame = new MyFrame(IBytes,width,height);
+				//is.read(IBytes, 0, IBytes.length);
+				MyFrame IFrame = new MyFrame(RBytes,width,height);
 				IFrame.convertRGB2YUV();
 				nfrm++;
 
@@ -208,12 +173,7 @@ public class MyEncoder {
 				//lbIm1.setIcon(new ImageIcon(img));
 
 			}
-			
-			/* Mod - Store */
-			// Close file output stream
-			fos.close();
-			
-//			encodedOutput.close();
+			encodedOutput.close();
 			is.close();
 
 		}
@@ -224,19 +184,9 @@ public class MyEncoder {
 		} 
 	}
 
-	/* Mod - Store */
-	private static void putCoefficient(ByteBuffer buffer, float[][] a) {
-		for (int y = 0; y < a[0].length; y++) {
-			for (int x = 0; x < a.length; x++) {
-				buffer.putFloat(a[x][y]);
-			}
-		}
-	}
+
 
 }
-
-
-
 //		IndexConverter conv = new IndexConverter(width,height,16);
 //		
 //		for (int i = 0;i<(width * 2);i++){
