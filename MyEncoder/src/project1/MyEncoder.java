@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -40,29 +41,31 @@ public class MyEncoder {
 		RBytes = new byte[width * height * 3];
 
 		//Magic Number must corrected
-		int numFrames = 564537600/(width * height * 3);
+		
 
 		try {
 			//To Display Frames.
-			GridBagConstraints c = new GridBagConstraints();
-			BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-			frame = new JFrame();
-			GridBagLayout gLayout = new GridBagLayout();
-			frame.getContentPane().setLayout(gLayout);
+			//GridBagConstraints c = new GridBagConstraints();
+			//BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+			//frame = new JFrame();
+			//GridBagLayout gLayout = new GridBagLayout();
+			//frame.getContentPane().setLayout(gLayout);
 
-			JLabel lbIm1 = new JLabel(new ImageIcon(img));
-			c.fill = GridBagConstraints.HORIZONTAL;
-			c.anchor = GridBagConstraints.CENTER;
-			c.gridx = 0;
-			c.gridy = 0;
-			frame.getContentPane().add(lbIm1, c);
-			frame.pack();
-			frame.setVisible(true);	
+			//JLabel lbIm1 = new JLabel(new ImageIcon(img));
+			//c.fill = GridBagConstraints.HORIZONTAL;
+			//c.anchor = GridBagConstraints.CENTER;
+			//c.gridx = 0;
+			//c.gridy = 0;
+			//frame.getContentPane().add(lbIm1, c);
+			//frame.pack();
+			//frame.setVisible(true);	
 
 			byte a = 0;
 			int size = width * height;			
 
 			File imageFile = new File(args[0]);
+			int numFrames = (int)(imageFile.length()/(width * height * 3));
+			PrintWriter encodedOutput = new PrintWriter("C:\\Users\\goksu\\workspace\\MyEncoder\\src\\project1\\encoded.cmp","UTF-8");
 			InputStream is = new FileInputStream(imageFile);
 			is.read(IBytes, 0, IBytes.length);
 			MyFrame CurFrame = new MyFrame(IBytes,width,height);
@@ -91,9 +94,11 @@ public class MyEncoder {
 						//System.out.print(conv.getBlockXIndex(rX, rY) + "   " + conv.getBlockYIndex(rX, rY));
 						//Write to the output file
 						if (mvec.refFrame.iBlocks[conv.getBlockXIndex(rX, rY)][conv.getBlockYIndex(rX, rY)].background) {
+							encodedOutput.write("0 ");
 							//System.out.print("B ");
 						}
 						else{
+							encodedOutput.write("1 ");
 							//System.out.print("F ");
 						}
 
@@ -144,11 +149,10 @@ public class MyEncoder {
 						//System.out.println("G1 = " + Matrix.toString(dctBM)); //to be deleted
 						dctB.DCT(dctBM);
 						//Write to the output file
+						encodedOutput.write(Matrix.toString(dctRM)+" "+Matrix.toString(dctGM)+" "+Matrix.toString(dctBM)+"\n");
 						//System.out.println("G2 = " + Matrix.toString(dctBM)); //to be deleted						
 					}
-					System.out.println();
 				}				
-
 
 				is.read(IBytes, 0, IBytes.length);
 				MyFrame IFrame = new MyFrame(IBytes,width,height);
@@ -157,7 +161,7 @@ public class MyEncoder {
 
 
 
-				for (int y = 0; y < height; y++) {
+				/*for (int y = 0; y < height; y++) {
 					for (int x = 0; x < width; x++) {
 						byte r = RBytes[width * y + x];
 						byte g = RBytes[width * y + x + size];
@@ -165,11 +169,11 @@ public class MyEncoder {
 						int pix  = ((a << 24) + (r << 16) + (g << 8) + b);
 						img.setRGB(x,y,pix);
 					}
-				} 
-
-				lbIm1.setIcon(new ImageIcon(img));
+				} */
+				//lbIm1.setIcon(new ImageIcon(img));
 
 			}
+			encodedOutput.close();
 			is.close();
 
 		}

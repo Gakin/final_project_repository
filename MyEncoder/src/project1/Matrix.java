@@ -1916,19 +1916,18 @@ public abstract class Matrix {
 
 		String fStr = PrintPrecision.getFormatStringFloat();
 
-		strm.format("{");
 
 		for (int i = 0; i < A.length; i++) {
 
 			if (i > 0)
 
-				strm.format(", ");
+				strm.format(" ");
 
 			strm.format(loc, fStr, A[i]);
 
 		}
 
-		strm.format("}");
+
 
 		strm.flush();
 
@@ -1960,11 +1959,11 @@ public abstract class Matrix {
 
 			if (i == 0)
 
-				strm.format("{");
+				strm.format("");
 
 			else
 
-				strm.format(", \n{");
+				strm.format(" \n");
 
 			for (int j=0; j< A[i].length; j++) {
 
@@ -1978,11 +1977,9 @@ public abstract class Matrix {
 
 			}
 
-			strm.format("}");
 
 		}
 
-		strm.format("}");
 
 		strm.flush();
 
@@ -2008,19 +2005,17 @@ public abstract class Matrix {
 
 		String fStr = PrintPrecision.getFormatStringFloat();
 
-		strm.format("{");
 
 		for (int i = 0; i < A.length; i++) {
 
 			if (i > 0)
 
-				strm.format(", ");
+				strm.format(" ");
 
 			strm.format(loc, fStr, A[i]);
 
 		}
 
-		strm.format("}");
 
 		strm.flush();
 
@@ -2046,17 +2041,16 @@ public abstract class Matrix {
 
 		String fStr = PrintPrecision.getFormatStringFloat();
 
-		strm.format("{");
 
 		for (int i=0; i< A.length; i++) {
 
 			if (i == 0)
 
-				strm.format("{");
+				strm.format("");
 
 			else
 
-				strm.format(", \n{");
+				strm.format(" \n");
 
 			for (int j=0; j< A[i].length; j++) {
 
@@ -2066,15 +2060,14 @@ public abstract class Matrix {
 
 				else
 
-					strm.format(loc, ", " + fStr, A[i][j]);
+					strm.format(loc, " " + fStr, A[i][j]);
 
 			}
 
-			strm.format("}");
 
 		}
 
-		strm.format("}");
+
 
 		strm.flush();
 

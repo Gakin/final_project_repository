@@ -1,10 +1,10 @@
-package dct;
+package project1;
 
 
 
-import dct.Matrix;
+import project1.Matrix;
 
-import dct.PrintPrecision;
+import project1.PrintPrecision;
 
 
 public class DctMatrixTest {
