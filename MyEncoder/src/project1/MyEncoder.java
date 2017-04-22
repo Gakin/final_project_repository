@@ -18,7 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 //import javax.swing.SwingConstants;
 
-import org.jtransforms.dct.FloatDCT_2D;
+import edu.emory.mathcs.jtransforms.dct.FloatDCT_2D;
 
 //import project1.DisplayFrame;
 import project1.MotionVectors;
@@ -36,7 +36,8 @@ public class MyEncoder {
 		int dctBlockSize    = 8;
 
 		byte[]	RBytes;
-		byte[]  IBytes;	
+		byte[]  IBytes;
+		byte[]  TBytes;
 
 
 		//Trial
@@ -44,8 +45,7 @@ public class MyEncoder {
 
 		IBytes = new byte[width * height * 3];
 		RBytes = new byte[width * height * 3];
-
-		//Magic Number must corrected
+		TBytes = new byte[width * height * 3];
 		
 
 		try {
@@ -85,6 +85,9 @@ public class MyEncoder {
 			int nfrm = 0;
 			while (nfrm <  numFrames){
 				is.read(RBytes, 0, RBytes.length);
+				for (int h=0;h<width*height*3;h++){
+					TBytes[h] = RBytes[h];
+				}
 				MyFrame RefFrame = new MyFrame(RBytes,width,height);
 
 				RefFrame.convertRGB2YUV();
@@ -190,10 +193,11 @@ public class MyEncoder {
 
 
 				//is.read(IBytes, 0, IBytes.length);
-				MyFrame IFrame = new MyFrame(RBytes,width,height);
+				for (int h=0;h<width*height*3;h++){
+					IBytes[h] = TBytes[h];
+				}
+				MyFrame IFrame = new MyFrame(IBytes,width,height);
 				IFrame.convertRGB2YUV();
-				nfrm++;
-
 
 
 				/*for (int y = 0; y < height; y++) {
