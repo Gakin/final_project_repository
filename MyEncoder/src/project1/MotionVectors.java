@@ -67,7 +67,7 @@ public class MotionVectors {
 		int vecX = 0;
 		int vecY = 0;
 		IndexConverter conv  = new IndexConverter(this.width,this.height,this.blockSize);
-		
+		double minVlength = 100000;
 		for (int rY=0; rY < refFrame.numY; rY++){
 			for (int rX = 0; rX < refFrame.numX; rX++){		
 				min = 10000;
@@ -125,7 +125,29 @@ public class MotionVectors {
 
 				
 				//Decision for background or foreground need to be updated camera move compansation ????
+				if (minVlength > refFrame.iBlocks[rX][rY].VLength){
+					minVlength = refFrame.iBlocks[rX][rY].VLength;
+				}
 				if (refFrame.iBlocks[rX][rY].VLength < 2.0){
+					refFrame.iBlocks[rX][rY].background = true;	
+				}
+				else{
+					refFrame.iBlocks[rX][rY].background = false;
+					
+					//Added to see the foregorund blocks will be removed
+					for (int py=0;py<16;py++){
+						for (int px=0;px<16;px++){
+							RFrame[conv.getFrameIndex(rX, rY, px,py)]= -127;
+						}
+					}
+					//End of block	
+					
+				}
+			}
+		}
+		for (int rY=0; rY < refFrame.numY; rY++){
+			for (int rX = 0; rX < refFrame.numX; rX++){	
+				if (refFrame.iBlocks[rX][rY].VLength < minVlength+2.0 || refFrame.iBlocks[rX][rY].VLength > minVlength-2.0){
 					refFrame.iBlocks[rX][rY].background = true;	
 				}
 				else{
