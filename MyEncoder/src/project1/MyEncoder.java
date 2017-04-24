@@ -1,26 +1,16 @@
 package project1;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
-//import javax.swing.SwingConstants;
 
-import edu.emory.mathcs.jtransforms.dct.FloatDCT_2D;
-
-//import project1.DisplayFrame;
 import project1.MotionVectors;
 import project1.IndexConverter;
 
@@ -74,7 +64,7 @@ public class MyEncoder {
 //			PrintWriter encodedOutput = new PrintWriter("C:\\Users\\goksu\\workspace\\MyEncoder\\src\\project1\\encoded.cmp","UTF-8");
 			
 			/* Mod - Store */
-			String targetFileName = "c:\\cs576\\oneperson_960_540.cmp";
+			String targetFileName = args[1];
 			FileOutputStream fos = new FileOutputStream(targetFileName);
 			
 			InputStream is = new FileInputStream(imageFile);
@@ -92,6 +82,8 @@ public class MyEncoder {
 
 				RefFrame.convertRGB2YUV();
 				nfrm++;
+				
+				System.out.print(":frame " + nfrm);
 
 				MotionVectors mvec = new MotionVectors(IBytes,RBytes,width,height,megaBlockSize);
 				mvec.SumAbsoluteDifference();
