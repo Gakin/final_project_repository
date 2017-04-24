@@ -36,9 +36,6 @@ public class BufferedDecoder extends BaseDecoder {
 		ImageFrequencyBlockVideo video = (ImageFrequencyBlockVideo) v;
 		width = v.getWidth();
 		height = v.getHeight();
-		frameCount = v.getFrameCount();
-		preparedFrame = new BufferedImage[getFrameCount()];
-		
 		
 		for(int i = 0; i < video.getFrameCount(); i++) {
 			Map params = new HashMap<>();
@@ -55,16 +52,23 @@ public class BufferedDecoder extends BaseDecoder {
 			if (i%10 == 0) {
 				System.out.println(":frame " + i);
 			}
+			
+		}
+		
+		frameCount = v.getFrameCount();
+		initPreparedFrame();
+	}
+	
+	protected void initPreparedFrame() {
+		preparedFrame = new BufferedImage[getFrameCount()];
+		for (int i = 0; i < getFrameCount(); i++) {
+			preparedFrame[i] = deepCopy(compressedFrames.get(i));
 		}
 	}
 
 	@Override
 	public void prepareFrame(int frame, Map params) {
-		if (preparedFrame[frame] == null) {
-			preparedFrame[frame] = deepCopy(compressedFrames.get(frame));
-		} else {
-			copySrcIntoDstAt(compressedFrames.get(frame), preparedFrame[frame], 0, 0);
-		}
+		copySrcIntoDstAt(compressedFrames.get(frame), preparedFrame[frame], 0, 0);
 		
 		if (params != null && params.containsKey(VideoPlayer.Property.MX)) {
 			int mx = (int) params.get(VideoPlayer.Property.MX);
@@ -146,6 +150,14 @@ public class BufferedDecoder extends BaseDecoder {
 
 	protected void setFrameCount(int frameCount) {
 		this.frameCount = frameCount;
+	}
+
+	protected BufferedImage[] getPreparedFrame() {
+		return preparedFrame;
+	}
+
+	protected void setPreparedFrame(BufferedImage[] preparedFrame) {
+		this.preparedFrame = preparedFrame;
 	}
 	
 }

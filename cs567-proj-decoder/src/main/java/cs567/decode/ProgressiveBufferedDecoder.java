@@ -63,6 +63,6 @@ public class ProgressiveBufferedDecoder extends BufferedDecoder {
 	@Override
 	public void init(BaseVideo v) {
 		setFrameCount(getCompressedFrames().size());
-		preparedFrame = new BufferedImage[getFrameCount()];
+		initPreparedFrame();
 	}
 }
