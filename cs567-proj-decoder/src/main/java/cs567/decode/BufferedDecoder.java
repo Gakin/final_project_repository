@@ -2,6 +2,7 @@ package cs567.decode;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.DataBufferInt;
 import java.awt.image.WritableRaster;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import cs567.player.VideoPlayer;
 import cs567.rep.base.BaseVideo;
 import cs567.rep.freqbased.ImageFrequencyBlockVideo;
 
-public class BufferedDecoder extends BaseDecoder{
+public class BufferedDecoder extends BaseDecoder {
 	
 	List<BufferedImage> compressedFrames;
 	List<BufferedImage> uncompressedFrames;
@@ -59,7 +60,11 @@ public class BufferedDecoder extends BaseDecoder{
 
 	@Override
 	public void prepareFrame(int frame, Map params) {
-		preparedFrame[frame] = deepCopy(compressedFrames.get(frame));
+		if (preparedFrame[frame] == null) {
+			preparedFrame[frame] = deepCopy(compressedFrames.get(frame));
+		} else {
+			copySrcIntoDstAt(compressedFrames.get(frame), preparedFrame[frame], 0, 0);
+		}
 		
 		if (params != null && params.containsKey(VideoPlayer.Property.MX)) {
 			int mx = (int) params.get(VideoPlayer.Property.MX);
@@ -85,6 +90,18 @@ public class BufferedDecoder extends BaseDecoder{
 		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
 	}
 	
+	private void copySrcIntoDstAt(final BufferedImage src, final BufferedImage dst, final int dx, final int dy) {
+	    int[] srcbuf = ((DataBufferInt) src.getRaster().getDataBuffer()).getData();
+	    int[] dstbuf = ((DataBufferInt) dst.getRaster().getDataBuffer()).getData();
+	    int width = src.getWidth();
+	    int height = src.getHeight();
+	    int dstoffs = dx + dy * dst.getWidth();
+	    int srcoffs = 0;
+	    for (int y = 0 ; y < height ; y++ , dstoffs+= dst.getWidth(), srcoffs += width ) {
+	        System.arraycopy(srcbuf, srcoffs , dstbuf, dstoffs, width);
+	    }
+	}
+	
 	@Override
 	public BufferedImage getFrame(int frame) {
 		return preparedFrame[frame];
@@ -100,6 +117,35 @@ public class BufferedDecoder extends BaseDecoder{
 
 	public int getFrameCount() {
 		return frameCount;
+	}
+
+	protected List<BufferedImage> getCompressedFrames() {
+		return compressedFrames;
+	}
+
+	protected void setCompressedFrames(List<BufferedImage> compressedFrames) {
+		this.compressedFrames = compressedFrames;
+	}
+
+	protected List<BufferedImage> getUncompressedFrames() {
+		return uncompressedFrames;
+	}
+
+	protected void setUncompressedFrames(List<BufferedImage> uncompressedFrames) {
+		this.uncompressedFrames = uncompressedFrames;
+	}
+
+	
+	protected void setWidth(int width) {
+		this.width = width;
+	}
+
+	protected void setHeight(int height) {
+		this.height = height;
+	}
+
+	protected void setFrameCount(int frameCount) {
+		this.frameCount = frameCount;
 	}
 	
 }

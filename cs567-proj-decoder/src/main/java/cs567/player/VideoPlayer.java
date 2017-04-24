@@ -122,6 +122,13 @@ public class VideoPlayer {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				nextFrame = 0;
+				
+				if (! isVideoPlaying()) {
+					decoder.prepareFrame(nextFrame, null);
+					BufferedImage bm = decoder.getFrame(nextFrame);
+					lbText.setText(detail + " @" + nextFrame); 
+					updateImg(bm);
+				}
 			}
 		});
 		
@@ -265,6 +272,14 @@ public class VideoPlayer {
 
 	public void setApplyGazeControl(boolean applyGazeControl) {
 		this.applyGazeControl = applyGazeControl;
+	}
+
+	public boolean isVideoPlaying() {
+		return videoPlaying;
+	}
+
+	public void setVideoPlaying(boolean videoPlaying) {
+		this.videoPlaying = videoPlaying;
 	}
 	
 	

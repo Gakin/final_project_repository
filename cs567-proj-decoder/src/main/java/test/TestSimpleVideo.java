@@ -8,7 +8,7 @@ import cs567.utils.VideoUtils;
 
 public class TestSimpleVideo {
 	public static void main(String[] args) {
-		SimpleVideo video = VideoUtils.readSimpleVideo("c:\\cs576\\oneperson_960_540.rgb", 960, 540);
+		SimpleVideo video = VideoUtils.readSimpleVideo("c:\\cs576\\two_people_moving_background.rgb", 960, 540);
 		BaseDecoder decoder = new SimpleDecoder();
 		VideoPlayer vp = new VideoPlayer();
 		vp.setDecoder(video, decoder, 30);

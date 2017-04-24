@@ -13,12 +13,13 @@ public class TestDecoder {
 	
 	
 	public static void main(String[] args) {
-		String cmpFileName = "c:\\cs576\\oneperson_960_540.cmp";
+//		String cmpFileName = "c:\\cs576\\two_people_moving_background.cmp";
+		String cmpFileName = "c:\\cs576\\two_people.cmp";
 		int width = 960;
 		int height = 540;
 		int fps = 30;
-		int fg_q = 64;
-		int bg_q = 256;
+		int fg_q = 1;
+		int bg_q = 25600;
 		int blockSize = 8;
 		boolean gazeControl = true;
 		
