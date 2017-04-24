@@ -66,8 +66,9 @@ public class MotionVectors {
 		int SearchSize = 8;
 		int vecX = 0;
 		int vecY = 0;
+		double avgX = 0;
+		double avgY = 0;
 		IndexConverter conv  = new IndexConverter(this.width,this.height,this.blockSize);
-		double minVlength = 100000;
 		for (int rY=0; rY < refFrame.numY; rY++){
 			for (int rX = 0; rX < refFrame.numX; rX++){		
 				min = 10000;
@@ -125,9 +126,10 @@ public class MotionVectors {
 
 				
 				//Decision for background or foreground need to be updated camera move compansation ????
-				if (minVlength > refFrame.iBlocks[rX][rY].VLength){
-					minVlength = refFrame.iBlocks[rX][rY].VLength;
-				}
+
+				avgX += vx;
+				avgY += vy;
+				
 				if (refFrame.iBlocks[rX][rY].VLength < 2.0){
 					refFrame.iBlocks[rX][rY].background = true;	
 				}
@@ -135,35 +137,29 @@ public class MotionVectors {
 					refFrame.iBlocks[rX][rY].background = false;
 					
 					//Added to see the foregorund blocks will be removed
-					for (int py=0;py<16;py++){
+					/*for (int py=0;py<16;py++){
 						for (int px=0;px<16;px++){
 							RFrame[conv.getFrameIndex(rX, rY, px,py)]= -127;
 						}
-					}
+					}*/
 					//End of block	
 					
 				}
 			}
 		}
+		avgX = avgX / refFrame.numY*refFrame.numX;
+		avgY = avgY / refFrame.numY*refFrame.numX;
 		for (int rY=0; rY < refFrame.numY; rY++){
-			for (int rX = 0; rX < refFrame.numX; rX++){	
-				if (refFrame.iBlocks[rX][rY].VLength < minVlength+2.0 || refFrame.iBlocks[rX][rY].VLength > minVlength-2.0){
-					refFrame.iBlocks[rX][rY].background = true;	
+			for (int rX = 0; rX < refFrame.numX; rX++){		
+				if ( Math.abs(refFrame.iBlocks[rX][rY].XVector - avgX) < 1.0 && Math.abs(refFrame.iBlocks[rX][rY].YVector - avgY) < 1.0){
+					refFrame.iBlocks[rX][rY].background = true;
 				}
 				else{
-					refFrame.iBlocks[rX][rY].background = false;
-					
-					//Added to see the foregorund blocks will be removed
-					for (int py=0;py<16;py++){
-						for (int px=0;px<16;px++){
-							RFrame[conv.getFrameIndex(rX, rY, px,py)]= -127;
-						}
-					}
-					//End of block	
-					
+					refFrame.iBlocks[rX][rY].background = false;	
 				}
 			}
 		}
+
 	}
 }
 
