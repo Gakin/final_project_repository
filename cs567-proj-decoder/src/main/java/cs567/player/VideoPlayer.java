@@ -36,6 +36,8 @@ public class VideoPlayer {
 	
 	JButton bPausePlay;
 	JButton bRestart;
+	JButton bPrev;
+	JButton bNext;
 	JToggleButton bGaze;
 	JLabel lbMouse;
 	
@@ -124,15 +126,36 @@ public class VideoPlayer {
 				nextFrame = 0;
 				
 				if (! isVideoPlaying()) {
-					decoder.prepareFrame(nextFrame, null);
-					BufferedImage bm = decoder.getFrame(nextFrame);
-					lbText.setText(detail + " @" + nextFrame); 
-					updateImg(bm);
+					displayNextFrame();
 				}
 			}
 		});
 		
 		controlPanel.add(bRestart);
+		
+		bPrev = new JButton("<");
+		bPrev.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				nextFrame = nextFrame == 0 ? decoder.getFrameCount() - 1 : nextFrame - 1;
+				displayNextFrame();
+			}
+		});
+		bPrev.setEnabled(false);
+		controlPanel.add(bPrev);
+		
+		bNext = new JButton(">");
+		bNext.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				nextFrame = (nextFrame + 1) % decoder.getFrameCount();
+				displayNextFrame();
+			}
+		});
+		bNext.setEnabled(false);
+		controlPanel.add(bNext);
 		
 		bGaze = new JToggleButton("Gaze Control");
 		bGaze.setSelected(isApplyGazeControl());
@@ -183,6 +206,9 @@ public class VideoPlayer {
 			@Override
 			public void mouseMoved(MouseEvent e) {
 				displayMousePosition(getMousePosition());
+				if (!isVideoPlaying() && isApplyGazeControl()) {
+					displayNextFrame();
+				}
 			}
 			
 			@Override
@@ -203,6 +229,22 @@ public class VideoPlayer {
 		frame.setVisible(true);
 	}
 	
+	private void displayNextFrame() {
+		Point mpos = getMousePosition();
+		
+		if (!isApplyGazeControl() || mpos == null) {
+			decoder.prepareFrame(nextFrame, null);
+		} else {
+			Map params = new HashMap<>();
+			params.put(VideoPlayer.Property.MX, (int)mpos.getX());
+			params.put(VideoPlayer.Property.MY, (int)mpos.getY());
+			decoder.prepareFrame(nextFrame, params);
+		}
+		
+		BufferedImage bm = decoder.getFrame(nextFrame);
+		lbText.setText(detail + " @" + nextFrame); 
+		updateImg(bm);
+	}
 	public void playVideo() {
 		int period = (int)(1000/frameRate);
 		timer = new Timer();
@@ -211,24 +253,13 @@ public class VideoPlayer {
 			boolean start = true;
 			@Override
 			public void run() {
-				Point mpos = getMousePosition();
-				
-				if (!isApplyGazeControl() || mpos == null) {
-					decoder.prepareFrame(nextFrame, null);
-				} else {
-					Map params = new HashMap<>();
-					params.put(VideoPlayer.Property.MX, (int)mpos.getX());
-					params.put(VideoPlayer.Property.MY, (int)mpos.getY());
-					decoder.prepareFrame(nextFrame, params);
-				}
-				
-				BufferedImage bm = decoder.getFrame(nextFrame);
-				lbText.setText(detail + " @" + nextFrame); 
-				updateImg(bm);
+				displayNextFrame();
 				
 				if (start) {
 					show();
 					start = false;
+					bPrev.setEnabled(false);
+					bNext.setEnabled(false);
 				}
 				nextFrame = (nextFrame+1) % decoder.getFrameCount();
 			}
@@ -252,6 +283,8 @@ public class VideoPlayer {
 		timer.cancel();
 		timer.purge();
 		videoPlaying = false;
+		bPrev.setEnabled(true);
+		bNext.setEnabled(true);
 	}
 	
 	public Point getMousePosition() {
