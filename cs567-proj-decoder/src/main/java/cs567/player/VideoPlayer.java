@@ -283,6 +283,7 @@ public class VideoPlayer {
 		timer.cancel();
 		timer.purge();
 		videoPlaying = false;
+		nextFrame = nextFrame == 0 ? decoder.getFrameCount() - 1 : nextFrame - 1;
 		bPrev.setEnabled(true);
 		bNext.setEnabled(true);
 	}
